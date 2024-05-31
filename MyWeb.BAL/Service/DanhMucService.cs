@@ -10,66 +10,69 @@ using System.Threading.Tasks;
 
 namespace MyWeb.BAL.Service
 {
-    public class DanhMucService : IDanhMucService
+    public class CategoryService : ICategoryService
     {
-        private readonly IRepository<DanhMuc> _repo;
+        private readonly ICategoryRepository _repo;
         private readonly ICacheData _memoryCache;
 
-        public DanhMucService(IRepository<DanhMuc> repo, ICacheData memoryCache)
+        public CategoryService(ICategoryRepository repo, ICacheData memoryCache)
         {
             _repo = repo;
             _memoryCache = memoryCache;
         }
 
         //GET All
-        public List<DanhMuc> GetAll()
+        public List<Category> GetAll()
         {
-            var data = new List<DanhMuc>();
+            var data = new List<Category>();
             try
             {
                 data = _repo.GetAll().ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-
+                data = null;
             }
             return data;
         }
 
         //Get By Id
-        public DanhMuc GetById(int Id)
+        public Category GetById(string Id)
         {
-            return GetAll().FirstOrDefault(x => x.Id == Id);
+            return _repo.GetById(Id);
         }
 
         //Add
-        public async Task<DanhMuc> Add(DanhMuc item)
-        {
-            var data = await _repo.Create(item);
-            return data;
-        }
-
-        //Delete
-        public bool Delete(int Id)
+        public bool Add(Category item)
         {
             try
             {
-                var item = _repo.GetAll().FirstOrDefault(x => x.Id == Id);
-                if (item != null)
-                {
-                    _repo.Delete(item);
-                }
+                _repo.Create(item);
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        //Delete
+        public bool Delete(string Id)
+        {
+            try
+            {
+                _repo.Delete(Id);
+                return true;
+            }
+            catch (Exception ex)
             {
                 return false;
             }
         }
 
         //Update
-        public bool Update(DanhMuc item)
+        public bool Update(Category item)
         {
             try
             {
@@ -77,7 +80,7 @@ namespace MyWeb.BAL.Service
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }

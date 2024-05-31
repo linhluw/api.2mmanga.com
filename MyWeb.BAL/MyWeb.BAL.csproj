@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
@@ -9,14 +9,21 @@
 	  <None Remove="ViewModels\Respones\**" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Remove="Service\ChiTietHoaDonBanService.cs" />
+	  <Compile Remove="Service\ChiTietHoaDonNhapService.cs" />
+	  <Compile Remove="Service\HoaDonBanService.cs" />
+	  <Compile Remove="Service\HoaDonNhapService.cs" />
+	  <Compile Remove="Service\NewsService.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Scrutor" Version="3.3.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.4" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.4">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -24,5 +31,8 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\MyWeb.COM\MyWeb.COM.csproj" />
 	  <ProjectReference Include="..\MyWeb.DAL\MyWeb.DAL.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Service\" />
 	</ItemGroup>
 </Project>

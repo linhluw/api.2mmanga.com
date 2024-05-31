@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace MyWeb.BAL.ViewModels.Response
 {
-    public class NewsSerchResponse
+    public class SanPhamSearchResponse
     {
         public int Id { get; set; }
 
@@ -31,22 +29,5 @@ namespace MyWeb.BAL.ViewModels.Response
         /// Số ngày hoạt động sản phẩm được tính từ ngày phát hành đến ngày hiện tại
         /// </summary>
         public double SoNgayHoatDong { get; set; } = 0;
-
-        /// <summary>
-        /// Số lượng sản phẩm trong kho
-        /// </summary>
-        public int KhoOffline { get; set; } = 0;
-
-        /// <summary>
-        /// Số lượng sản phẩm trong kho
-        /// </summary>
-        public int KhoShopee { get; set; } = 0;
-
-        /// <summary>
-        /// Số lượng sản phẩm trong kho
-        /// </summary>
-        public int KhoLazada { get; set; } = 0;
-
-
     }
 }

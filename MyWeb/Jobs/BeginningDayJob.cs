@@ -2,7 +2,6 @@
 using Quartz;
 using System;
 using System.Threading.Tasks;
-using MyWeb.Data;
 
 namespace MyWeb.Jobs
 {
@@ -10,19 +9,17 @@ namespace MyWeb.Jobs
     public class BeginningDayJob : IJob
     {
         private readonly ILogger<BeginningDayJob> _logger;
-        private readonly IDbInitializer _dbInitializer;
 
-        public BeginningDayJob(ILogger<BeginningDayJob> logger, IDbInitializer dbInitializer)
+        public BeginningDayJob(ILogger<BeginningDayJob> logger)
         {
             _logger = logger;
-            _dbInitializer = dbInitializer;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             try
             {
-                await _dbInitializer.SeedFromServiceCacheToInstanceCache();
+               
             }
             catch (Exception ex)
             {

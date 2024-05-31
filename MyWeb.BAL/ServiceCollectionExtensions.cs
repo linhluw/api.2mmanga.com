@@ -11,7 +11,7 @@ namespace MyWeb.BAL
             services.AddTransient<ICacheData, CacheData>();
 
             services.Scan(scan => scan
-           .FromAssemblyOf<ISanPhamService>()
+           .FromAssemblyOf<ICategoryService>()
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service")))
                    .AsImplementedInterfaces()
                    .WithScopedLifetime());

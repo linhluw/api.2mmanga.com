@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace MyWeb.Controllers
 {
-    [Route("sanpham")]
+    [Route("category")]
     [ApiController]
-    public class SanPhamController : ApiCoreController
+    public class CategoryController : ApiCoreController
     {
-        private readonly ISanPhamService _service;
+        private readonly ICategoryService _service;
 
-        public SanPhamController(ISanPhamService service)
+        public CategoryController(ICategoryService service)
         {
             _service = service;
         }
@@ -24,13 +24,13 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public async Task<ApiResponse> Add([FromBody] SanPham item)
+        public ApiResponse Add([FromBody] Category item)
         {
             try
             {
-                var result = await _service.Add(item);
+                var result = _service.Add(item);
 
-                if (result != null)
+                if (result)
                 {
                     return new ApiOkResultResponse(result, LanguageKey.InsertSuccess, "");
                 }
@@ -51,11 +51,10 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public async Task<ApiResponse> Deleted(int Id)
+        public ApiResponse Deleted(string Id)
         {
             try
             {
-                await Task.Delay(0);
                 var result = _service.Delete(Id);
 
                 if (result)
@@ -79,11 +78,10 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public async Task<ApiResponse> Updated(SanPham item)
+        public ApiResponse Updated(Category item)
         {
             try
             {
-                await Task.Delay(0);
                 var result = _service.Update(item);
 
                 if (result)
@@ -102,44 +100,15 @@ namespace MyWeb.Controllers
             }
         }
 
-        ////Update IsActive
-        //[HttpPost("updated/isactive")]
-        //[ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        //[Consumes("application/json")]
-        //public async Task<ApiResponse> UpdatedIsActive(News item)
-        //{
-        //    try
-        //    {
-        //        await Task.Delay(0);
-        //        var result = _service.UpdateIsActive(item.Id, item.IsActive);
-
-        //        if (result)
-        //        {
-        //            return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
-        //        }
-        //        else
-        //        {
-        //            return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
-        //        }
-
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
-        //    }
-        //}
-
         //GET ID
         [HttpGet("getid")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public async Task<ApiResponse> GetId(int id)
+        public ApiResponse GetId(string id)
         {
             try
             {
-                await Task.Delay(0);
                 var result = _service.GetById(id);
 
                 if (result != null)
@@ -163,11 +132,10 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public async Task<ApiResponse> GetAll()
+        public ApiResponse GetAll()
         {
             try
             {
-                await Task.Delay(0);
                 var result = _service.GetAll();
 
                 if (result != null)
@@ -185,33 +153,5 @@ namespace MyWeb.Controllers
                 return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
             }
         }
-
-        ////Page
-        //[HttpPost("page")]
-        //[ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        //[Consumes("application/json")]
-        //public async Task<ApiResponse> Paging(GetListNewsQuery rq)
-        //{
-        //    try
-        //    {
-        //        await Task.Delay(0);
-        //        var result = _service.GetPaginated(rq);
-
-        //        if (result != null)
-        //        {
-        //            return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
-        //        }
-        //        else
-        //        {
-        //            return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
-        //        }
-
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
-        //    }
-        //}
     }
 }

@@ -10,7 +10,6 @@ using MyWeb.BAL;
 using MyWeb.BAL.Service;
 using MyWeb.DAL;
 using MyWeb.DAL.Data;
-using MyWeb.Data;
 using MyWeb.Quartz;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -30,7 +29,7 @@ namespace MyWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+            var appconfig = services.AddConfigOptions<ConfigOptions>();
             services.AddControllers();
             services.AddHttpClient();
             services.AddRepositories();
@@ -63,7 +62,6 @@ namespace MyWeb
             });
             #endregion
             services.AddMemoryCache();
-            services.AddScoped<IDbInitializer, DbInitializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

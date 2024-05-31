@@ -4,16 +4,16 @@ using System.Threading.Tasks;
 
 namespace MyWeb.BAL.Service
 {
-    public interface IDanhMucService
+    public interface ICategoryService
     {
-        List<DanhMuc> GetAll();
+        List<Category> GetAll();
 
-        DanhMuc GetById(int Id);
+        Category GetById(string Id);
 
-        Task<DanhMuc> Add(DanhMuc item);
+        bool Add(Category item);
 
-        bool Delete(int Id);
+        bool Delete(string Id);
 
-        bool Update(DanhMuc item);
+        bool Update(Category item);
     }
 }

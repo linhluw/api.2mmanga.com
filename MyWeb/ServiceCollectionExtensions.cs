@@ -43,5 +43,16 @@ namespace MyWeb
             }
             return services;
         }
+
+        public static T AddConfigOptions<T>(this IServiceCollection services) where T : class
+        {
+            var svcProvider = services.BuildServiceProvider();
+            var config = svcProvider.GetRequiredService<IConfiguration>();
+            var appconfig = (T)Activator.CreateInstance(typeof(T));
+            config.Bind("ConfigOptions", appconfig);
+            services.AddSingleton(appconfig);
+            services.Configure<T>(config.GetSection("ConfigOptions"));
+            return appconfig;
+        }
     }
 }

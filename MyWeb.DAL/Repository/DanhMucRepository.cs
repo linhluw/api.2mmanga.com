@@ -1,57 +1,102 @@
-﻿using MyWeb.DAL.Data;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using MyWeb.DAL.Data;
 using MyWeb.DAL.Interface;
 using MyWeb.DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyWeb.DAL.Repository
 {
-    public class DanhMucRepository : IRepository<DanhMuc>
+    public class CategoryRepository : BaseRepository, ICategoryRepository
     {
-        private ApplicationDbContext _dbContext;
-
-        public DanhMucRepository(ApplicationDbContext applicationDbContext)
+        public CategoryRepository(ConfigOptions config) : base(config)
         {
-            _dbContext = applicationDbContext;
         }
 
-        public async Task<DanhMuc> Create(DanhMuc _object)
+        public void Create(Category _object)
         {
-            _object.Id = 0;//gán = 0
-            var obj = await _dbContext.DanhMuc.AddAsync(_object);
-            _dbContext.SaveChanges();
-            return obj.Entity;
+            using (IDbCommand cmd = _db.CreateCommand())
+            {
+                cmd.CommandText = "sp_Category_Insert";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@Name", _object.Name));
+                cmd.ExecuteNonQuery();
+            }
         }
 
-        public void Delete(DanhMuc _object)
+        public void Delete(string Id)
         {
-            _dbContext.Remove(_object);
-            _dbContext.SaveChanges();
+            using (IDbCommand cmd = _db.CreateCommand())
+            {
+                cmd.CommandText = "sp_Category_Delete";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@PK_CategoryId", Id));
+                cmd.ExecuteNonQuery();
+            }
         }
 
-        public IEnumerable<DanhMuc> GetAll()
+        public List<Category> GetAll()
         {
+            List<Category> lst = new List<Category>();
+
             try
             {
-                return _dbContext.DanhMuc;
+                string command = "SELECT [PK_CategoryId],[Name] FROM [Category]";
+                using (IDataReader dataReader = _db.ExecuteReader(command))
+                {
+                    while (dataReader.Read())
+                    {
+                        Category item = new Category();
+                        item.PK_CategoryId = dataReader["PK_CategoryId"].AsString();
+                        item.Name = dataReader["Name"].AsString();
+                        lst.Add(item);
+                    }
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw;
+
             }
+            return lst;
         }
 
-        public DanhMuc GetById(int Id)
+        public Category GetById(string Id)
         {
-            return _dbContext.DanhMuc.FirstOrDefault(x => x.Id == Id);
+            Category item = new Category();
+
+            try
+            {
+                string command = string.Format("SELECT [PK_CategoryId],[Name] FROM [Category] WHERE Id='{0}'", Id);
+                using (IDataReader dataReader = _db.ExecuteReader(command))
+                {
+                    while (dataReader.Read())
+                    {
+                        item.PK_CategoryId = dataReader["PK_CategoryId"].AsString();
+                        item.Name = dataReader["Name"].AsString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return item ?? null;
         }
 
-        public void Update(DanhMuc _object)
+        public void Update(Category _object)
         {
-            _dbContext.DanhMuc.Update(_object);
-            _dbContext.SaveChanges();
+            using (IDbCommand cmd = _db.CreateCommand())
+            {
+                cmd.CommandText = "sp_Category_Update";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@PK_CategoryId", _object.PK_CategoryId));
+                cmd.Parameters.Add(new SqlParameter("@Name", _object.Name));
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }
