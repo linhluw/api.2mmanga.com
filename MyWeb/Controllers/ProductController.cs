@@ -1,34 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyWeb.ApiController;
 using MyWeb.BAL.Service;
+using MyWeb.BAL.ViewModels.Requests;
 using MyWeb.DAL.Models;
 using System;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace MyWeb.Controllers
 {
-    [Route("category")]
+    [Route("product")]
     [ApiController]
-    public class CategoryController : ApiCoreController
+    public class ProductController : ApiCoreController
     {
-        private readonly ICategoryService _service;
+        private readonly IProductService _service;
 
-        public CategoryController(ICategoryService service)
+        public ProductController(IProductService service)
         {
             _service = service;
         }
 
-        //Add
-        [HttpPost("add")]
+        //Create
+        [HttpPost("create")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public ApiResponse Add([FromBody] Category item)
+        public ApiResponse Create([FromBody] Product item)
         {
             try
             {
-                var result = _service.Add(item);
+                var result = _service.CreateOrUpdate(item, string.IsNullOrEmpty(item.PK_ProductId));
 
                 if (result)
                 {
@@ -73,33 +73,6 @@ namespace MyWeb.Controllers
             }
         }
 
-        //Update
-        [HttpPost("updated")]
-        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [Consumes("application/json")]
-        public ApiResponse Updated(Category item)
-        {
-            try
-            {
-                var result = _service.Update(item);
-
-                if (result)
-                {
-                    return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
-                }
-                else
-                {
-                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
-                }
-
-            }
-            catch (Exception)
-            {
-                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
-            }
-        }
-
         //GET ID
         [HttpGet("getid")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
@@ -117,7 +90,7 @@ namespace MyWeb.Controllers
                 }
                 else
                 {
-                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.GetFailed, "");
                 }
 
             }
@@ -127,7 +100,7 @@ namespace MyWeb.Controllers
             }
         }
 
-        //GET All Person
+        //GET All
         [HttpGet("getall")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -141,6 +114,87 @@ namespace MyWeb.Controllers
                 if (result != null)
                 {
                     return new ApiOkResultResponse(result, LanguageKey.GetSuccess, "");
+                }
+                else
+                {
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.GetFailed, "");
+                }
+
+            }
+            catch (Exception)
+            {
+                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
+            }
+        }
+
+        //Search
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Consumes("application/json")]
+        public ApiResponse Search(ProductSearchRequest rq)
+        {
+            try
+            {
+                var result = _service.GetProductPaginated(rq);
+
+                if (result != null)
+                {
+                    return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
+                }
+                else
+                {
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
+                }
+
+            }
+            catch (Exception)
+            {
+                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
+            }
+        }
+
+        //Search
+        [HttpGet("gettag")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Consumes("application/json")]
+        public ApiResponse GetTag(string tag)
+        {
+            try
+            {
+                var result = _service.GetDetail(tag);
+
+                if (result != null)
+                {
+                    return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
+                }
+                else
+                {
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
+                }
+
+            }
+            catch (Exception)
+            {
+                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
+            }
+        }
+
+        //Cart
+        [HttpGet("cart")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Consumes("application/json")]
+        public ApiResponse GetCart(string userid)
+        {
+            try
+            {
+                var result = _service.GetCart(userid);
+
+                if (result != null)
+                {
+                    return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
                 }
                 else
                 {

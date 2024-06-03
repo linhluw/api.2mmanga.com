@@ -2,7 +2,7 @@
 
 namespace MyWeb.DAL.Interface
 {
-    public interface ICategoryRepository : IRepository<Category>
+    public interface IUserRepository : IRepository<User>
     {
     }
 }

@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using MyWeb.DAL.Models;
+using System.Collections.Generic;
 
 namespace MyWeb.DAL.Interface
 {
     public interface IRepository<T>
     {
-        public void Create(T _object);
+        bool CreateOrUpdate(T _object);
 
-        public void Update(T _object);
+        bool Delete(string Id);
 
-        public List<T> GetAll();
+        List<T> GetAll();
+
+        T GetById(string Id);
     }
 }

@@ -32,7 +32,4 @@
 	  <ProjectReference Include="..\MyWeb.COM\MyWeb.COM.csproj" />
 	  <ProjectReference Include="..\MyWeb.DAL\MyWeb.DAL.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Service\" />
-	</ItemGroup>
 </Project>

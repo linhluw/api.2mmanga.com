@@ -32,4 +32,8 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\MyWeb.COM\MyWeb.COM.csproj" />
+	</ItemGroup>
+
 </Project>
