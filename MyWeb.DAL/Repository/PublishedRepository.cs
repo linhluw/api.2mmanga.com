@@ -47,7 +47,7 @@ namespace MyWeb.DAL.Repository
         /// </summary>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public bool Delete(string Id)
+        public bool Delete(Published _object)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace MyWeb.DAL.Repository
                 {
                     cmd.CommandText = "sp_Published_Delete";
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@PK_PublishedId", Id));
+                    cmd.Parameters.Add(new SqlParameter("@PK_PublishedId", _object.PK_PublishedId));
                     cmd.ExecuteNonQuery();
                 }
                 return true;

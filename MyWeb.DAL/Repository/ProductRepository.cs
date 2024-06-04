@@ -62,7 +62,7 @@ namespace MyWeb.DAL.Repository
         /// </summary>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public bool Delete(string Id)
+        public bool Delete(Product _object)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace MyWeb.DAL.Repository
                 {
                     cmd.CommandText = "sp_Product_Delete";
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@PK_ProductId", Id));
+                    cmd.Parameters.Add(new SqlParameter("@PK_ProductId", _object.PK_ProductId));
                     cmd.ExecuteNonQuery();
                 }
                 return true;

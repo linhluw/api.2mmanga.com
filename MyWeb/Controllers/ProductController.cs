@@ -20,7 +20,7 @@ namespace MyWeb.Controllers
         }
 
         //Create
-        [HttpPost("create")]
+        [HttpPost("created")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
@@ -51,11 +51,11 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public ApiResponse Deleted(string Id)
+        public ApiResponse Deleted(Product item)
         {
             try
             {
-                var result = _service.Delete(Id);
+                var result = _service.Delete(item);
 
                 if (result)
                 {
@@ -195,6 +195,33 @@ namespace MyWeb.Controllers
                 if (result != null)
                 {
                     return new ApiOkResultResponse(result, LanguageKey.UpdateSuccess, "");
+                }
+                else
+                {
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
+                }
+
+            }
+            catch (Exception)
+            {
+                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
+            }
+        }
+
+        //CreatedOrder
+        [HttpPost("createdorder")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Consumes("application/json")]
+        public ApiResponse CreatedOrder([FromBody] OrderCreatedOrUpdatedRequest item)
+        {
+            try
+            {
+                var result = _service.Order(item);
+
+                if (result)
+                {
+                    return new ApiOkResultResponse(result, LanguageKey.InsertSuccess, "");
                 }
                 else
                 {

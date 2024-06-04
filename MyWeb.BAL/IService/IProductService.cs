@@ -13,5 +13,7 @@ namespace MyWeb.BAL.Service
         ProductDetailResponse GetDetail(string tag);
 
         List<CartResponse> GetCart(string userid);
+
+        bool Order(OrderCreatedOrUpdatedRequest item);
     }
 }

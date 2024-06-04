@@ -84,19 +84,32 @@ namespace MyWeb.BAL.Service
             var result = _repo.CreateOrUpdate(item);
             if (result)
             {
-                var data = GetAll();
-                if (data != null && data.Count > 0)
+                if (isCreate)
                 {
-                    data.Add(item);
+                    var data = GetAll();
+                    if (data != null && data.Count > 0)
+                    {
+                        data.Add(item);
+                    }
+                }
+                else
+                {
+                    RemoveCache();
                 }
             }
             return result;
         }
 
         //Delete
-        public virtual bool Delete(string Id)
+        public virtual bool Delete(T item)
         {
-            return _repo.Delete(Id) ? true : false;
+            return _repo.Delete(item) ? true : false;
+        }
+
+        public void RemoveCache()
+        {
+            string cache = ManagerCacheString.ConstructCacheKey(typeof(T).Name, CacheKey.CacheAll);
+            _memoryCache.Remove(cache);
         }
     }
 }

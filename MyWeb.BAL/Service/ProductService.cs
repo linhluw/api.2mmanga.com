@@ -8,30 +8,35 @@ using System;
 using System.Linq;
 using MyWeb.BAL.ViewModels.Response;
 using MyWeb.BAL.ViewModels.Requests;
+using System.Net;
 
 namespace MyWeb.BAL.Service
 {
     public class ProductService : BaseService<Product>, IProductService
     {
-        private readonly ICartRepository _repoCart;
-
         private readonly ICategoryService _categoryService;
         private readonly IPublishedService _publishedService;
+        private readonly ICartService _cartService;
+        private readonly IOrderService _orderService;
+        private readonly IOrderProductService _orderProductService;
 
-        public ProductService(IRepository<Product> repo, ICacheData memoryCache, ICategoryService categoryService, IPublishedService publishedService, ICartRepository repoCart) : base(repo, memoryCache)
+        public ProductService(IRepository<Product> repo, ICacheData memoryCache, ICategoryService categoryService,
+            IPublishedService publishedService, ICartService cartService, IOrderService orderService, IOrderProductService orderProductService) : base(repo, memoryCache)
         {
             _categoryService = categoryService;
             _publishedService = publishedService;
-            _repoCart = repoCart;
+            _cartService = cartService;
+            _orderService = orderService;
+            _orderProductService = orderProductService;
             //_repo = repo;
         }
 
-        //public override bool CreateOrUpdate(Product item)
-        //{
-        //    item.TagName = StringClass.NameToTag(item.Name);
-        //    item.SignName = StringClass.NameToSign(item.Name);
-        //    return base.CreateOrUpdate(item);
-        //}
+        public override bool CreateOrUpdate(Product item, bool isCreate = true)
+        {
+            item.TagName = StringClass.NameToTag(item.Name);
+            item.SignName = StringClass.NameToSign(item.Name);
+            return base.CreateOrUpdate(item);
+        }
 
         public override Product GetById(string Id)
         {
@@ -155,7 +160,7 @@ namespace MyWeb.BAL.Service
         public List<CartResponse> GetCart(string userid)
         {
             var response = new List<CartResponse>();
-            var lst = _repoCart.GetCartByUserId(userid);
+            var lst = _cartService.GetCartByUserId(userid);
             if (lst != null && lst.Count > 0)
             {
                 foreach (var item in lst)
@@ -177,6 +182,67 @@ namespace MyWeb.BAL.Service
                 }
             }
             return response;
+        }
+
+        /// <summary>
+        /// Lên đơn
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Order(OrderCreatedOrUpdatedRequest item)
+        {
+            // kiểm tra xem là insert hay update
+            var isCreated = string.IsNullOrEmpty(item.PK_OrderId) && Guid.Parse(item.PK_OrderId) != Guid.Empty;
+
+            // Tính giá sau discount
+            if (item != null && item.LstProducts != null && item.LstProducts.Count > 0)
+            {
+                // khởi tạo đơn hàng
+                var order = new Order
+                {
+                    PK_OrderId = Guid.NewGuid().ToString(),
+                    FK_UserId = item.FK_UserId,
+                    Phone = item.Phone,
+                    Address = item.Address,
+                    Status = (int)NameStatus.KhoiTaoDon,
+                    IsCancel = false
+                };
+
+                var totalPrice = 0;
+
+                var lstOrderProduct = new List<OrderProduct>();
+                foreach (var product in item.LstProducts)
+                {
+                    var result = GetById(product.FK_ProductId);
+                    if (result != null)
+                    {
+                        var payments = (int)(result.Price * ((100 - result.Discount) / 100));
+
+                        lstOrderProduct.Add(new OrderProduct
+                        {
+                            FK_OrderId = order.PK_OrderId,
+                            FK_ProductId = result.PK_ProductId,
+                            Quantity = product.Quantity,
+                            Price = result.Price,
+                            Discount = result.Discount,
+                            Payments = payments
+                        });
+
+                        totalPrice += payments;
+                    }
+                }
+                // Tổng tiền đơn hàng
+                order.TotalPrice = totalPrice;
+
+                // Thực hiện insert dữ liệu
+                _orderService.CreateOrUpdate(order, isCreated);
+
+                foreach (var pd in lstOrderProduct)
+                {
+                    _orderProductService.CreateOrUpdate(pd, isCreated);
+                }
+            }
+            return true;
         }
     }
 }

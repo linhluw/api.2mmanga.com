@@ -19,7 +19,7 @@ namespace MyWeb.Controllers
         }
 
         //Create
-        [HttpPost("create")]
+        [HttpPost("created")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
@@ -50,11 +50,11 @@ namespace MyWeb.Controllers
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Consumes("application/json")]
-        public ApiResponse Deleted(string Id)
+        public ApiResponse Deleted(Category item)
         {
             try
             {
-                var result = _service.Delete(Id);
+                var result = _service.Delete(item);
 
                 if (result)
                 {

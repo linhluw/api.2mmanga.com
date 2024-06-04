@@ -10,6 +10,6 @@ namespace MyWeb.BAL.Service
 
         bool CreateOrUpdate(T item, bool isCreate = true);
 
-        bool Delete(string Id);
+        bool Delete(T item);
     }
 }

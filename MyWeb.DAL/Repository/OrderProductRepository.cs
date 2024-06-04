@@ -10,9 +10,9 @@ using System.Data;
 
 namespace MyWeb.DAL.Repository
 {
-    public class CartRepository : BaseRepository, ICartRepository
+    public class OrderProductRepository : BaseRepository, IOrderProductRepository
     {
-        public CartRepository(ConfigOptions config) : base(config)
+        public OrderProductRepository(ConfigOptions config) : base(config)
         {
         }
 
@@ -21,81 +21,87 @@ namespace MyWeb.DAL.Repository
         /// </summary>
         /// <param name="_object"></param>
         /// <returns></returns>
-        public bool CreateOrUpdate(Cart _object)
+        public bool CreateOrUpdate(OrderProduct _object)
         {
             try
             {
                 using (IDbCommand cmd = _db.CreateCommand())
                 {
-                    cmd.CommandText = "sp_Cart_InsertOrUpdate";
+                    cmd.CommandText = "sp_OrderProduct_InsertOrUpdate";
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add(new SqlParameter("@FK_OrderId", _object.FK_OrderId));
                     cmd.Parameters.Add(new SqlParameter("@FK_ProductId", _object.FK_ProductId));
                     cmd.Parameters.Add(new SqlParameter("@Quantity", _object.Quantity));
-                    cmd.Parameters.Add(new SqlParameter("@FK_UserId", _object.FK_UserId));
+                    cmd.Parameters.Add(new SqlParameter("@Price", _object.Price));
+                    cmd.Parameters.Add(new SqlParameter("@Discount", _object.Discount));
+                    cmd.Parameters.Add(new SqlParameter("@Payments", _object.Payments));
                     cmd.ExecuteNonQuery();
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                FileHelper.WriteLog("CartRepository", ex);
+                FileHelper.WriteLog("OrderProductRepository", ex);
                 return false;
             }
         }
 
-        public bool Delete(Cart _object)
+        public bool Delete(OrderProduct _object)
         {
             try
             {
                 using (IDbCommand cmd = _db.CreateCommand())
                 {
-                    cmd.CommandText = "sp_Cart_Delete";
+                    cmd.CommandText = "sp_OrderProduct_Delete";
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add(new SqlParameter("@FK_OrderId", _object.FK_OrderId));
                     cmd.Parameters.Add(new SqlParameter("@FK_ProductId", _object.FK_ProductId));
-                    cmd.Parameters.Add(new SqlParameter("@FK_UserId", _object.FK_UserId));
                     cmd.ExecuteNonQuery();
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                FileHelper.WriteLog("CartRepository", ex);
+                FileHelper.WriteLog("OrderProductRepository", ex);
                 return false;
             }
         }
 
-        public List<Cart> GetAll()
+        public List<OrderProduct> GetAll()
         {
-            return new List<Cart>();
+            return new List<OrderProduct>();
         }
 
-        public Cart GetById(string Id)
+        public OrderProduct GetById(string Id)
         {
-            return new Cart();
+            return new OrderProduct();
         }
 
-        public List<Cart> GetCartByUserId(string UserId)
+        public List<OrderProduct> GetOrderProductByOrderId(string OrderId)
         {
-            List<Cart> lst = new List<Cart>();
+            List<OrderProduct> lst = new List<OrderProduct>();
 
             try
             {
-                string command = string.Format("SELECT [FK_ProductId],[Quantity],[FK_UserId] FROM [Cart] WHERE FK_UserId='{0}'", UserId);
+                string command = string.Format("SELECT [FK_OrderId],[FK_ProductId],[Quantity],[Price],[Discount],[Payments] FROM [OrderProduct] WHERE FK_OrderId='{0}'", OrderId);
                 using (IDataReader dataReader = _db.ExecuteReader(command))
                 {
                     while (dataReader.Read())
                     {
-                        Cart item = new Cart();
+                        OrderProduct item = new OrderProduct();
+                        item.FK_OrderId = dataReader["FK_OrderId"].AsString();
                         item.FK_ProductId = dataReader["FK_ProductId"].AsString();
                         item.Quantity = dataReader["Quantity"].AsInt(0);
-                        item.FK_UserId = dataReader["FK_UserId"].AsString();
+                        item.Price = dataReader["Price"].AsInt(0);
+                        item.Discount = dataReader["Discount"].AsInt(0);
+                        item.Payments = dataReader["Payments"].AsInt(0);
                         lst.Add(item);
                     }
                 }
             }
             catch (Exception ex)
             {
-                FileHelper.WriteLog("CartRepository", ex);
+                FileHelper.WriteLog("OrderProductRepository", ex);
             }
             return lst;
         }

@@ -7,7 +7,7 @@ namespace MyWeb.DAL.Interface
     {
         bool CreateOrUpdate(T _object);
 
-        bool Delete(string Id);
+        bool Delete(T _object);
 
         List<T> GetAll();
 
