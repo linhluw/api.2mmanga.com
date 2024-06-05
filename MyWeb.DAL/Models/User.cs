@@ -20,7 +20,7 @@ namespace MyWeb.DAL.Models
 
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        public bool Active { get; set; } = false;
+        public bool IsActive { get; set; } = false;
 
         public int PermissionId { get; set; } = 0;
     }

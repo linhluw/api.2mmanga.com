@@ -41,7 +41,7 @@ namespace MyWeb.BAL.Service
                         data.Password = item.Password;
                         data.Phone = item.Phone;
                         data.Address = item.Address;
-                        data.Active = item.Active;
+                        data.IsActive = item.IsActive;
                         data.PermissionId = item.PermissionId;
                     }
                 }

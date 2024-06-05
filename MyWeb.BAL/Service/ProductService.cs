@@ -83,29 +83,31 @@ namespace MyWeb.BAL.Service
                     data = data.Skip((rq.PageIndex - 1) * rq.PageSize).Take(rq.PageSize).ToList();
                     if (data != null && data.Count > 0)
                     {
-                        var dataRespone = new List<ProductSearchResponse>();
-                        data.ForEach(item =>
-                        {
-                            dataRespone.Add(new ProductSearchResponse
-                            {
-                                PK_ProductId = item.PK_ProductId,
-                                Name = item.Name,
-                                TagName = item.TagName,
-                                Images = item.Images.Length > 0 ? item.Images.Split(',')[0].Trim() : string.Empty,
-                                Quantity = item.Quantity,
-                                Price = item.Price,
-                                Discount = item.Discount,
-                                Payments = (int)(item.Price * ((100 - item.Discount) / 100)),
-                                PublishedName = _publishedService.GetById(item.FK_PublishedId)?.Name ?? string.Empty,
-                                CategoryName = _categoryService.GetById(item.FK_CategoryId)?.Name ?? string.Empty,
-                                ReleaseDate = item.ReleaseDate,
-                                IsSoldAll = item.IsSoldAll
-                            });
-                        });
+                        var groupPublished = _publishedService.GetAll();
+                        var groupCategory = _categoryService.GetAll();
+
+                        var dataRespone = from item in data
+                                    join published in groupPublished on item.FK_PublishedId equals published.PK_PublishedId
+                                    join category in groupCategory on item.FK_CategoryId equals category.PK_CategoryId
+                                    select new ProductSearchResponse
+                                    {
+                                        PK_ProductId = item.PK_ProductId,
+                                        Name = item.Name,
+                                        TagName = item.TagName,
+                                        Images = item.Images.Length > 0 ? item.Images.Split(',')[0].Trim() : string.Empty,
+                                        Quantity = item.Quantity,
+                                        Price = item.Price,
+                                        Discount = item.Discount,
+                                        Payments = (int)(item.Price * ((100 - item.Discount) / 100)),
+                                        PublishedName = published.Name,
+                                        CategoryName = category.Name,
+                                        ReleaseDate = item.ReleaseDate,
+                                        IsSoldAll = item.IsSoldAll
+                                    };
 
                         response = new PaginatedItem<ProductSearchResponse>(
                         totals, totals % rq.PageSize == 0 ? totals / rq.PageSize : totals / rq.PageSize + 1,
-                        dataRespone);
+                        dataRespone.ToList());
                     }
                 }
             }

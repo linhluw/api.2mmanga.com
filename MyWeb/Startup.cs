@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MyWeb.BAL;
 using MyWeb.BAL.Service;
 using MyWeb.DAL;
 using MyWeb.DAL.Data;
+using MyWeb.Dequeues;
 using MyWeb.Quartz;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -29,6 +31,12 @@ namespace MyWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var svcProvider = services.BuildServiceProvider();
+            var config = svcProvider.GetRequiredService<IConfiguration>();
+            services.Configure<RabbitMQOptions>(config.GetSection("RabbitMQConnection"));
+            services.AddSingleton<RabbitMQClientBase>();
+            services.AddSingleton<RabbitChannelProcess>();
+
             var appconfig = services.AddConfigOptions<ConfigOptions>();
             services.AddControllers();
             services.AddHttpClient();
@@ -41,6 +49,17 @@ namespace MyWeb
             });
             services.AddQuartz();
             services.AddHostedService<QuartzHostedService>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("MemOrigins",
+                builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
             #region Enable Response Compression
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Optimal);
             services.AddResponseCompression(options =>
@@ -62,6 +81,9 @@ namespace MyWeb
             });
             #endregion
             services.AddMemoryCache();
+            services.AddSingleton<RabbitMQServices>();
+            services.AddSingleton<IHostedService, RabbitMQServices>(
+            serviceProvider => serviceProvider.GetService<RabbitMQServices>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,6 +101,8 @@ namespace MyWeb
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors("MemOrigins");
 
             app.UseEndpoints(endpoints =>
             {
