@@ -8,6 +8,8 @@ namespace MyWeb.BAL.Service
 {
     public interface IProductService : IBaseService<Product>
     {
+        bool CreatedDataSapo(string adminSesionId);
+
         PaginatedItem<ProductSearchResponse> GetProductPaginated(ProductSearchRequest rq);
 
         ProductDetailResponse GetDetail(string tag);

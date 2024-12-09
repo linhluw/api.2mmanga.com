@@ -81,9 +81,9 @@ namespace MyWeb
             });
             #endregion
             services.AddMemoryCache();
-            services.AddSingleton<RabbitMQServices>();
-            services.AddSingleton<IHostedService, RabbitMQServices>(
-            serviceProvider => serviceProvider.GetService<RabbitMQServices>());
+            //services.AddSingleton<RabbitMQServices>();
+            //services.AddSingleton<IHostedService, RabbitMQServices>(
+            //serviceProvider => serviceProvider.GetService<RabbitMQServices>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

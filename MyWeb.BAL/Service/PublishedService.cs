@@ -18,5 +18,10 @@ namespace MyWeb.BAL.Service
         {
             return GetAll()?.FirstOrDefault(x => x.PK_PublishedId == Id);
         }
+
+        public Published GetByName(string name)
+        {
+            return GetAll()?.FirstOrDefault(x => x.Name == name);
+        }
     }
 }

@@ -46,6 +46,8 @@ namespace MyWeb.DAL.Repository
                     cmd.Parameters.Add(new SqlParameter("@ReleaseDate", _object.ReleaseDate));
                     cmd.Parameters.Add(new SqlParameter("@CreatedDate", _object.CreatedDate));
                     cmd.Parameters.Add(new SqlParameter("@IsSoldAll", _object.IsSoldAll));
+                    cmd.Parameters.Add(new SqlParameter("@IsType", _object.IsType));
+                    cmd.Parameters.Add(new SqlParameter("@IsLimited", _object.IsLimited));
                     cmd.ExecuteNonQuery();
                 }
                 return true;
@@ -92,7 +94,7 @@ namespace MyWeb.DAL.Repository
 
             try
             {
-                string command = "SELECT [PK_ProductId],[Name],[TagName],[SignName],[Images],[Quantity],[Price],[Discount],[Weight],[Details],[BarCode],[SapoCode],[FK_PublishedId],[FK_CategoryId],[ReleaseDate],[IsSoldAll] FROM [Product]";
+                string command = "SELECT [PK_ProductId],[Name],[TagName],[SignName],[Images],[Quantity],[Price],[Discount],[Weight],[Details],[BarCode],[SapoCode],[FK_PublishedId],[FK_CategoryId],[ReleaseDate],[IsSoldAll] FROM [Product] ORDER BY [CreatedDate] DESC";
                 using (IDataReader dataReader = _db.ExecuteReader(command))
                 {
                     while (dataReader.Read())
@@ -114,6 +116,8 @@ namespace MyWeb.DAL.Repository
                         item.FK_CategoryId = dataReader["FK_CategoryId"].AsString();
                         item.ReleaseDate = dataReader["ReleaseDate"].AsDateTime();
                         item.IsSoldAll = dataReader["IsSoldAll"].AsBool(false);
+                        item.IsType = dataReader["IsType"].AsInt(0);
+                        item.IsLimited = dataReader["IsLimited"].AsBool(false);
                         lst.Add(item);
                     }
                 }
@@ -136,7 +140,7 @@ namespace MyWeb.DAL.Repository
 
             try
             {
-                string command = string.Format("SELECT [PK_ProductId],[Name],[TagName],[SignName],[Images],[Quantity],[Price],[Discount],[Weight],[Details],[BarCode],[SapoCode],[FK_PublishedId],[FK_CategoryId],[ReleaseDate],[IsSoldAll] FROM [Product] WHERE PK_ProductId='{0}'", Id);
+                string command = string.Format("SELECT [PK_ProductId],[Name],[TagName],[SignName],[Images],[Quantity],[Price],[Discount],[Weight],[Details],[BarCode],[SapoCode],[FK_PublishedId],[FK_CategoryId],[ReleaseDate],[IsSoldAll],[IsType],[IsLimited] FROM [Product] WHERE PK_ProductId='{0}'", Id);
                 using (IDataReader dataReader = _db.ExecuteReader(command))
                 {
                     while (dataReader.Read())
@@ -157,6 +161,8 @@ namespace MyWeb.DAL.Repository
                         item.FK_CategoryId = dataReader["FK_CategoryId"].AsString();
                         item.ReleaseDate = dataReader["ReleaseDate"].AsDateTime();
                         item.IsSoldAll = dataReader["IsSoldAll"].AsBool(false);
+                        item.IsType = dataReader["IsType"].AsInt(0);
+                        item.IsLimited = dataReader["IsLimited"].AsBool(false);
                     }
                 }
             }

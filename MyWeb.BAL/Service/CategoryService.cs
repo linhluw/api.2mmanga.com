@@ -23,5 +23,10 @@ namespace MyWeb.BAL.Service
         {
             return GetAll()?.FirstOrDefault(x => x.PK_CategoryId == Id);
         }
+
+        public Category GetByName(string name)
+        {
+            return GetAll()?.FirstOrDefault(x => x.Name == name);
+        }
     }
 }

@@ -46,6 +46,33 @@ namespace MyWeb.Controllers
             }
         }
 
+        //Create
+        [HttpPost("createddatasapo")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Consumes("application/json")]
+        public ApiResponse CreateDataSapo(string adminseid)
+        {
+            try
+            {
+                var result = _service.CreatedDataSapo(adminseid);
+
+                if (result)
+                {
+                    return new ApiOkResultResponse(result, LanguageKey.InsertSuccess, "");
+                }
+                else
+                {
+                    return new ApiBadRequestResponse(ResponseCodeEnums.ErrorKey, LanguageKey.ErrorTryAgain, "");
+                }
+
+            }
+            catch (Exception)
+            {
+                return new ApiBadRequestResponse(ResponseCodeEnums.ErrorTypeParams, LanguageKey.ErrorInputParams, "");
+            }
+        }
+
         //Delete
         [HttpPost("deleted")]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]

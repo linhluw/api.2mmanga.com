@@ -88,5 +88,15 @@ namespace MyWeb.DAL.Models
         /// Đã bán hết
         /// </summary>
         public bool IsSoldAll { get; set; } = false;
+
+        /// <summary>
+        /// Kiểu Type: HOT, TOP, NORMAL
+        /// </summary>
+        public int IsType { get; set; } = 0;
+
+        /// <summary>
+        /// Phiên bản Lim
+        /// </summary>
+        public bool IsLimited { get; set; } = false;
     }
 }

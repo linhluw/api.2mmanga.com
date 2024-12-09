@@ -64,6 +64,16 @@ namespace MyWeb.BAL.ViewModels.Response
         /// Đã bán hết
         /// </summary>
         public bool IsSoldAll { get; set; } = false;
+
+        /// <summary>
+        /// Kiểu Type: HOT, TOP, NORMAL
+        /// </summary>
+        public int IsType { get; set; } = 0;
+
+        /// <summary>
+        /// Phiên bản Lim
+        /// </summary>
+        public bool IsLimited { get; set; } = false;
     }
 
     public class ProductDetailResponse : ProductSearchResponse
@@ -79,4 +89,11 @@ namespace MyWeb.BAL.ViewModels.Response
         public List<string> LstImage { get; set; } = new List<string>();
     }
 
+
+    public enum EnumIsType
+    {
+        Normal = 0,
+        Hot = 1,
+        Top = 2
+    }
 }

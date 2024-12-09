@@ -9,6 +9,16 @@ using System.Linq;
 using MyWeb.BAL.ViewModels.Response;
 using MyWeb.BAL.ViewModels.Requests;
 using System.Net;
+using Azure.Core;
+using Azure;
+using Newtonsoft.Json;
+using System.IO;
+using MyWeb.BAL.ViewModels.Sapo;
+using System.Collections;
+using System.Diagnostics;
+using System.ComponentModel;
+using System.Reflection;
+using System.Linq.Expressions;
 
 namespace MyWeb.BAL.Service
 {
@@ -29,6 +39,128 @@ namespace MyWeb.BAL.Service
             _orderService = orderService;
             _orderProductService = orderProductService;
             //_repo = repo;
+        }
+
+
+        /// <summary>
+        /// lấy dữ liệu từ sapo
+        /// </summary>
+        /// <param name="adminSesionId"></param>
+        /// <returns></returns>
+        public bool CreatedDataSapo(string adminSesionId)
+        {
+            var url = "https://2mmanga.mysapogo.com/admin/products.json?page=1&limit=250";
+            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+            try
+            {
+                httpRequest.Method = "GET";
+                httpRequest.ContentType = "application/json; charset=utf-8";
+                httpRequest.CookieContainer = new CookieContainer();
+                httpRequest.CookieContainer.Add(new Cookie("_admin_session_id", adminSesionId) { Domain = "2mmanga.mysapogo.com" });
+                httpRequest.Timeout = 1800 * 1000; // 1800s = 30 phút
+
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var res = JsonConvert.DeserializeObject<RootSapo>(streamReader.ReadToEnd());
+                    if (res != null && res.products.Count > 0)
+                    {
+                        foreach (var product in res.products)
+                        {
+                            var info = product.variants.FirstOrDefault();
+
+                            if (int.TryParse(info.sku.Replace("PVN", string.Empty), out int sku) && (int.TryParse(GetAll().FirstOrDefault()?.SapoCode.Replace("PVN", string.Empty), out int sapoCode)))
+                            {
+                                if(sku > sapoCode)
+                                {
+                                    var image = string.Join(",", product.images.Select(x => x.full_path));
+                                    var createdDate = product.created_on;
+                                    var quantity = (int)info.inventories.FirstOrDefault().available;
+                                    var item = new Product
+                                    {
+                                        Name = info.product_name,
+                                        Images = image,
+                                        Quantity = quantity,
+                                        Price = (int)info.variant_retail_price,
+                                        Weight = (int)info.weight_value == 0 ? 300 : (int)info.weight_value,
+                                        BarCode = info.sku,
+                                        SapoCode = info.sku,
+                                        FK_PublishedId = GetPublishedIdSapo(info.brand_id),
+                                        FK_CategoryId = GetCategoriesIdSapo(info.category_id),
+                                        ReleaseDate = createdDate.Date,
+                                        CreatedDate = createdDate,
+                                        IsSoldAll = quantity > 0 ? false : true,
+
+                                    };
+
+                                    CreateOrUpdate(item);
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                httpRequest = null;
+            }
+            catch (Exception ex)
+            {
+                httpRequest = null;
+                return false;
+            }
+            return true;
+        }
+
+        private string GetCategoriesIdSapo(int categories_id)
+        {
+            var code = string.Empty;
+            switch (categories_id)
+            {
+                case (int)CategoriesID.VanPhongPham:
+                    code = ReturnCodeId<CategoriesID>(CategoriesID.VanPhongPham);
+                    break;
+                case (int)CategoriesID.LightNovel:
+                    code = ReturnCodeId<CategoriesID>(CategoriesID.LightNovel);
+                    break;
+                case (int)CategoriesID.Comic:
+                    code = ReturnCodeId<CategoriesID>(CategoriesID.Comic);
+                    break;
+            }
+
+            return _categoryService.GetByName(code).PK_CategoryId;
+        }
+
+        private string GetPublishedIdSapo(int brand_id)
+        {
+            var code = string.Empty;
+            switch (brand_id)
+            {
+                case (int)BrandID.AMAK:
+                    code = ReturnCodeId<BrandID>(BrandID.AMAK);
+                    break;
+                case (int)BrandID.IPM:
+                    code = ReturnCodeId<BrandID>(BrandID.AMAK);
+                    break;
+                case (int)BrandID.Tre:
+                    code = ReturnCodeId<BrandID>(BrandID.Tre);
+                    break;
+                case (int)BrandID.KimDong:
+                    code = ReturnCodeId<BrandID>(BrandID.KimDong);
+                    break;
+            }
+
+            return _publishedService.GetByName(code).PK_PublishedId;
+        }
+
+        public static string ReturnCodeId<T>(T vaule)
+        {
+            FieldInfo field = vaule.GetType().GetField(vaule.ToString());
+
+            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
+
+            return attribute.Description;
         }
 
         public override bool CreateOrUpdate(Product item, bool isCreate = true)
@@ -79,6 +211,9 @@ namespace MyWeb.BAL.Service
 
                     var totals = data.Count();
 
+                    // sắp xếp lại
+                    data = data.OrderBy(c => c.IsSoldAll).ThenByDescending(n => n.ReleaseDate).ToList();
+
                     // phân trang dữ liệu
                     data = data.Skip((rq.PageIndex - 1) * rq.PageSize).Take(rq.PageSize).ToList();
                     if (data != null && data.Count > 0)
@@ -87,23 +222,25 @@ namespace MyWeb.BAL.Service
                         var groupCategory = _categoryService.GetAll();
 
                         var dataRespone = from item in data
-                                    join published in groupPublished on item.FK_PublishedId equals published.PK_PublishedId
-                                    join category in groupCategory on item.FK_CategoryId equals category.PK_CategoryId
-                                    select new ProductSearchResponse
-                                    {
-                                        PK_ProductId = item.PK_ProductId,
-                                        Name = item.Name,
-                                        TagName = item.TagName,
-                                        Images = item.Images.Length > 0 ? item.Images.Split(',')[0].Trim() : string.Empty,
-                                        Quantity = item.Quantity,
-                                        Price = item.Price,
-                                        Discount = item.Discount,
-                                        Payments = (int)(item.Price * ((100 - item.Discount) / 100)),
-                                        PublishedName = published.Name,
-                                        CategoryName = category.Name,
-                                        ReleaseDate = item.ReleaseDate,
-                                        IsSoldAll = item.IsSoldAll
-                                    };
+                                          join published in groupPublished on item.FK_PublishedId equals published.PK_PublishedId
+                                          join category in groupCategory on item.FK_CategoryId equals category.PK_CategoryId
+                                          select new ProductSearchResponse
+                                          {
+                                              PK_ProductId = item.PK_ProductId,
+                                              Name = item.Name,
+                                              TagName = item.TagName,
+                                              Images = item.Images.Length > 0 ? item.Images.Split(',')[0].Trim() : string.Empty,
+                                              Quantity = item.Quantity,
+                                              Price = item.Price,
+                                              Discount = item.Discount,
+                                              Payments = (int)(item.Price * ((100 - item.Discount) / 100)),
+                                              PublishedName = published.Name,
+                                              CategoryName = category.Name,
+                                              ReleaseDate = item.ReleaseDate,
+                                              IsSoldAll = item.IsSoldAll,
+                                              IsType = item.IsType,
+                                              IsLimited = item.IsLimited
+                                          };
 
                         response = new PaginatedItem<ProductSearchResponse>(
                         totals, totals % rq.PageSize == 0 ? totals / rq.PageSize : totals / rq.PageSize + 1,
